@@ -2,6 +2,59 @@
 Fine-tuning a small open LLM to turn messy support tickets into schema-valid JSON.
 Served and benchmarked with SGLang. Built for Syntax Error 2026 (Local LLM Track).
 
+## Results at a glance
+
+- Qwen2.5-1.5B-Instruct, LoRA fine-tuned on 1,349 synthetic tickets, evaluated on a held-out split of 300 tickets from unseen templates and styles.
+- The tuned model is 100% schema-valid with or without constrained decoding; the base model is 0.000 plain and 0.973 constrained.
+- Exact match over the 5 structured fields goes from 0.027 (base, constrained) to 0.533 (tuned).
+- Priority (0.70) and needs_human (0.84) are the weakest fields.
+- Synthetic, template-based data, one seed, one run; see Limitations.
+
+| model / mode | schema-valid | exact match |
+|---|---|---|
+| base / plain | 0.000 | 0.000 |
+| base / constrained | 0.973 | 0.027 |
+| tuned / plain | 1.000 | 0.533 |
+| tuned / constrained | 1.000 | 0.533 |
+
+## Pipeline
+
+```text
+synthetic generator (src/gen_tickets.py)
+  -> CuratorKIT curation (src/curate.py)
+  -> HF dataset (bharataggarwal56/ticketforge-data)
+  -> AlignTune LoRA SFT on Colab T4 (Notebook A)
+  -> merged model (HF)
+  -> SGLang serving, plain and constrained (Notebook B)
+  -> AuditKIT scoring + sglang.bench_serving
+```
+
+- **SGLang:** serves the base and merged tuned model through an OpenAI-compatible API, with and without `response_format` schema-constrained decoding, and `sglang.bench_serving` gives latency and throughput.
+- **CuratorKIT:** dedups, cleans and pseudonymizes PII in the generated tickets, then exports `sft_messages.jsonl` with the system prompt.
+- **AlignTune:** runs LoRA SFT of Qwen2.5-1.5B-Instruct on the curated messages, then the adapter is merged for serving.
+- **AuditKIT:** runs the test split against the SGLang server and applies the custom scorers (schema-valid, per-field accuracy, exact match, summary F1).
+
+## Output schema and labeling rules
+
+The model must reply with one JSON object with exactly these keys, defined in `configs/schema.json` (`additionalProperties: false`, all keys required):
+
+| Field | Type | Constraint |
+|---|---|---|
+| category | string | `billing`, `technical`, `account`, `shipping`, `other` |
+| priority | string | `low`, `medium`, `high`, `urgent` |
+| product | string | 1-60 characters, as written in the ticket |
+| sentiment | string | `negative`, `neutral`, `positive` |
+| summary | string | 1-160 characters, at most 20 words (enforced by a word-count `pattern`), no personal details |
+| needs_human | boolean | true only if the customer asks for a person, agent, supervisor or callback, else false |
+
+Labeling rules from the system prompt in `src/prompt.py`:
+
+- If the ticket mentions several problems, category and product come from the first one and priority is the highest one mentioned.
+- If it describes one problem but explicitly requests a different action, the requested action decides the category.
+- If sentiment is mixed, use the last sentiment expressed.
+
+The summary word-count `pattern` was not used for constrained serving: the SGLang server rejected the full schema, so constrained decoding used the schema without it. The scorer still validates every output against the full schema.
+
 ## Data
 
 Synthetic, label-first tickets from `src/gen_tickets.py` (seed 42): labels are sampled first and the ticket is rendered to match, so gold JSON is correct by construction. Train and test use disjoint phrase banks and styles; a leakage check (no shared bank IDs, no shared 8-grams) runs on every generation. Design: `docs/plan.md` §1.
@@ -112,3 +165,28 @@ Exact match is over the 5 structured fields (summary excluded). Latency and thro
 - One model, one seed, one run. No human-labelled data. fp16 on a free T4.
 - Priority is the weakest field, but `tuned.json` stores only 5 sample outputs, so no confusion matrix can be built and the cause is not analysed. Future work: save all predictions and analyse priority and needs_human errors.
 - The cause of the 8 base/constrained schema failures is not determined, for the same reason.
+
+## How to reproduce
+
+**Laptop** (Python 3.11+, no GPU needed):
+
+```bash
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+python src/gen_tickets.py --n 1500
+python src/curate.py --tag 2026-10-24
+python -m unittest discover tests
+```
+
+Do not install `aligntune` or `sglang` in the laptop venv. `src/push_data.py` uploads the curated data and code to the HF dataset repo.
+
+**Colab (T4).** Add a Colab secret named `HF_TOKEN` (with notebook access enabled). Never paste a token into a notebook or commit it. Run the notebooks in order:
+
+1. `notebooks/A_train.ipynb`: AlignTune LoRA SFT, pushes the adapter and merged model to HF. Uses the default Colab runtime (`pip install aligntune`); SGLang is not installed here.
+2. `notebooks/B_serve_eval.ipynb`: serves base and merged tuned models with SGLang, runs AuditKIT and `sglang.bench_serving`, writes `results/`. SGLang lives in a separate uv Python 3.12 venv (`uv venv --python 3.12`, `uv pip install --prerelease=allow sglang`); AuditKIT is installed in the default runtime and talks to the server over HTTP. AlignTune is not installed here.
+
+The environments are kept separate because AlignTune and SGLang pin conflicting `transformers` and torch versions. The notebooks are generated by `notebooks/build_A_train.py` and `notebooks/build_B_serve_eval.py`.
+
+## Licenses of the toolkits
+
+From `docs/tools.md`: CuratorKIT is LSAL v1.1 (non-commercial); AlignTune is MIT (its vendored Unsloth backend brings in AGPL components, while the TRL backend runs no AGPL code); AuditKIT is LSAL v1.2 (source-available). Check each project's repository before any commercial use.
