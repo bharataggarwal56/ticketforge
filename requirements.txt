@@ -1,0 +1,5 @@
+# Laptop venv only. Never install aligntune or sglang here (see docs/plan.md).
+curatorkit[hygiene]==0.1.22
+jsonschema==4.26.0
+# spaCy model for CuratorKIT's PII step:
+#   python -m spacy download en_core_web_sm

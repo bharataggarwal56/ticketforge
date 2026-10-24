@@ -20,3 +20,16 @@ python -m unittest discover tests
 | Ticket words (min / mean / max) | 21 / 38.0 / 72 | 31 / 50.3 / 83 |
 | Summary words (min / mean / max) | 5 / 9.3 / 18 | 7 / 11.2 / 20 |
 | Leakage check | passed | |
+
+### Curation (CuratorKIT 0.1.22, `src/curate.py`)
+
+```bash
+python src/curate.py --tag 2026-10-24      # -> data/curated/{train,test}_<tag>/
+```
+
+Train and test are curated in separate runs. Minhash dedup (threshold 0.85), cleaning and PII pseudonymization (emails, phones, card numbers, etc.; ticket text only) run, then `sft_messages.jsonl` is exported with the system prompt from `src/prompt.py`. Post-checks confirm every row is system/user/assistant, every label is schema-valid and unchanged, and every product name survived.
+
+| Run | Raw | Exported | Near-duplicates removed | Rejected |
+|---|---|---|---|---|
+| train | 1,500 | 1,499 (train 1,349 / validation 150) | 1 (two identical tweet tickets differing only in email) | 0 |
+| test | 300 | 300 (+ `test_meta.jsonl` with `hard_case`) | 0 | 0 |

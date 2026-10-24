@@ -9,6 +9,7 @@ checkpoints/
 outputs/
 wandb/
 data/raw/
+data/curated/
 # AI tooling files (keep repo clean)
 .claude/
 CLAUDE.md
