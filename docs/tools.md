@@ -211,7 +211,7 @@ print(trainer.evaluate())
 path = trainer.save_model(output_dir="outputs/sft")
 ```
 
-The documented examples show these keyword arguments separately; this combination hasn't been run yet. For QLoRA, add `quantization={"load_in_4bit": True}`. CLI equivalent: `aligntune train --model ... --dataset ... --type sft`.
+Corrections from running AlignTune 0.1.28 on the laptop (see `docs/plan.md` §4): use `task_type="sft"` (`chat_completion` fails in the DataManager), and set `precision="fp16"` on a T4. The combination above otherwise loads and trains on CPU. For QLoRA, add `quantization={"load_in_4bit": True}`. CLI equivalent: `aligntune train --model ... --dataset ... --type sft`.
 
 ### Merging LoRA for serving
 

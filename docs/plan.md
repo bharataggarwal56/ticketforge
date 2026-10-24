@@ -55,11 +55,15 @@ Serve the base model and evaluate the test set two ways: **unconstrained** (prom
 
 ## 4. Training (Notebook A, Colab T4)
 
-- AlignTune `create_sft_trainer` with `model_name="Qwen/Qwen2.5-1.5B-Instruct"`, `backend="trl"` (switch to unsloth only if it works on a T4), and `task_type="chat_completion"`.
-- LoRA r=16, alpha=32, dropout 0.05 on q/k/v/o, plus gate/up/down if VRAM allows.
-- `max_seq_length=512`, 3 epochs, lr 2e-4, batch 4, with grad accumulation as needed.
-- **Use fp16, not bf16** (the T4 has no bf16). Look up the exact precision argument in the AlignTune docs or source before writing it.
-- Run `aligntune advise estimate` on the laptop first to check VRAM.
+- AlignTune `create_sft_trainer` with `model_name="Qwen/Qwen2.5-1.5B-Instruct"`, `backend="trl"` (switch to unsloth only if it works on a T4), and `task_type="sft"`. `chat_completion` is rejected by AlignTune 0.1.28's DataManager (checked on the laptop).
+- LoRA r=16, alpha=32, dropout 0.05 on q/k/v/o/gate/up/down.
+- `max_seq_length=384`: the longest train/validation example is 361 tokens (p99 342), the longest assistant answer 65 (p99 60), so nothing is truncated. 3 epochs, lr 2e-4, batch 4 with grad accumulation 2 (168 steps/epoch).
+- **fp16, not bf16** (the T4 has no bf16): pass `precision="fp16"`. In the source, `PrecisionHandler` turns it into `SFTConfig(fp16=True, bf16=False)` and loads the weights in float16. Top-level `fp16=`/`bf16=` kwargs are not used by the SFT config builder. Checked: `build_sft_config` gives `fp16=True, bf16=False`.
+- AlignTune computes `max_steps = len(train)*epochs // (batch*grad_accum)` (505 here), so "every epoch" means `save_interval = eval_interval = steps_per_epoch`.
+- Hub options (`push_to_hub`, `hub_model_id`, `hub_strategy="all_checkpoints"`, `hub_private_repo`) are not named arguments; they reach `SFTConfig` as extra kwargs. Checked on a CPU run that `hub_model_id`, `hub_strategy`, `hub_private_repo` and `save_steps` land. `push_to_hub=True` itself was not exercised, to avoid a real push.
+- AlignTune's `train()` has no resume argument, so Notebook A wraps `trl.SFTTrainer.train` to pass `resume_from_checkpoint`. Checked on CPU: a run resumed from `checkpoint-4` continued at step 5.
+- AlignTune runs the data through CuratorKIT again; the real train folder comes out as 1,349 / 150 rows with identical messages.
+- Ran `aligntune advise estimate --gpu t4 --seq-len 384` on the laptop: VRAM 3.1 GB for batch 4 and 2.2 GB for batch 2 (±30%). Its wallclock figure (~0.02 h) is not credible; time the real run.
 - Merge with `aligntune.utils.load_finetuned_model` and `save_pretrained` to `outputs/merged`. Push the adapter and the merged model to HF Hub.
 
 ## 5. Final eval (Notebook B)
