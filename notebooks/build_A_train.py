@@ -30,6 +30,8 @@ Needs a Colab secret named `HF_TOKEN` (notebook access on). SGLang is never inst
 """)
 
 code("""
+import os
+os.environ["PURE_TRL_MODE"] = "1"  # AlignTune's switch: never import unsloth (it patches TRL globally)
 !nvidia-smi | head -12
 !pip install -q aligntune
 import aligntune, trl, transformers, torch
@@ -109,7 +111,8 @@ TRAIN_KW = dict(
     backend="trl",
     task_type="sft",  # AlignTune 0.1.28 DataManager rejects "chat_completion"
     messages_column="messages",
-    chat_template="auto",
+    # No chat_template kwarg: AlignTune treats any value without Jinja markers (like "auto") as an Unsloth
+    # template name and imports unsloth, which patches TRL's SFTTrainer. Qwen's own template is used instead.
     output_dir="/content/outputs/sft",
     num_epochs=EPOCHS,
     batch_size=BATCH,
@@ -134,7 +137,7 @@ TRAIN_KW = dict(
 
 md("## Re-run state: skip if finished, resume if checkpoints exist on HF")
 code("""
-import re
+import re, sys
 def repo_files(repo):
     try:
         return api.list_repo_files(repo, repo_type="model")
@@ -168,6 +171,8 @@ if not FINAL_DONE:
 
     from aligntune.core.backend_factory import create_sft_trainer
     trainer = create_sft_trainer(**TRAIN_KW)
+    assert "unsloth" not in sys.modules and not trl.SFTTrainer.__module__.startswith("unsloth"), (
+        "unsloth got imported and patches TRL. Run `pip uninstall -y unsloth unsloth_zoo`, restart the runtime, and re-run.")
     result = trainer.train()
     print(result)
 

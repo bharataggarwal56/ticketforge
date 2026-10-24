@@ -211,7 +211,7 @@ print(trainer.evaluate())
 path = trainer.save_model(output_dir="outputs/sft")
 ```
 
-Corrections from running AlignTune 0.1.28 on the laptop (see `docs/plan.md` §4): use `task_type="sft"` (`chat_completion` fails in the DataManager), and set `precision="fp16"` on a T4. The combination above otherwise loads and trains on CPU. For QLoRA, add `quantization={"load_in_4bit": True}`. CLI equivalent: `aligntune train --model ... --dataset ... --type sft`.
+Corrections from running AlignTune 0.1.28 on the laptop (see `docs/plan.md` §4): use `task_type="sft"` (`chat_completion` fails in the DataManager), and set `precision="fp16"` on a T4. Do **not** pass `chat_template="auto"`: `setup_tokenizer` treats any string without Jinja markers as an Unsloth template name and runs `from unsloth.chat_templates import get_chat_template`, which on a GPU imports unsloth and patches TRL's `SFTTrainer` globally (Colab error: "Unsloth: You must specify a formatting_func"). Leave `chat_template` unset to use the model's own template; `PURE_TRL_MODE=1` is AlignTune's switch to skip its other unsloth checks. The combination above otherwise loads and trains on CPU. For QLoRA, add `quantization={"load_in_4bit": True}`. CLI equivalent: `aligntune train --model ... --dataset ... --type sft`.
 
 ### Merging LoRA for serving
 
