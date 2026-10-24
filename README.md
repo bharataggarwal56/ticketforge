@@ -46,3 +46,7 @@ Curated data is in the private HF dataset `bharataggarwal56/ticketforge-data` (`
 | `aligntune advise estimate` (T4, seq 384) | VRAM 3.1 GB at batch 4, 2.2 GB at batch 2 (±30%) |
 
 The T4 training run itself has not been done yet; results will be added here.
+
+### Evaluation (Notebook B, `notebooks/B_serve_eval.ipynb`)
+
+`src/scorers.py` holds the metrics (strict `json.loads`, schema-valid, per-field accuracy, `exact_match_fields` as the headline, summary length and F1). `python -m unittest discover tests` checks them, runs AuditKIT against a stub server, and confirms `response_format` is forwarded. Notebook B serves the base and the merged tuned model with SGLang on one T4, evaluates plain and constrained decoding, runs `sglang.bench_serving`, and writes `results/baseline.json`, `results/tuned.json`, `comparison.md` and `comparison.png` (pushed to the HF dataset repo after each model). `RUN_BASE` / `RUN_TUNED` select the halves. Not run on a GPU yet; results will be added here.

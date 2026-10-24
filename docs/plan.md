@@ -137,7 +137,7 @@ ak.evaluate(samples, model="api:MODEL", api_base="http://localhost:30000/v1", ap
             scorers=[...])
 ```
 
-**Not yet run.** Check it on the laptop before relying on it: point `api_base` at a local `http.server` stub that records the JSON body, then assert that `response_format` is in it. Pin the AuditKIT version that passes this check. If it fails, use a callable that wraps `openai.Client` with `response_format` (risk R1).
+**Checked (2026-10-24, AuditKIT 1.1.3, `tests/test_scorers.py`):** a local `http.server` stub records the request body; `response_format`, `messages == build_messages(ticket)`, `temperature=0`, `max_tokens=256` and the `Bearer EMPTY` header are all present, and `response_format` is absent when not passed. Pinned in `requirements.txt`. `PromptAdapter` (in `src/scorers.py`) sends `build_messages` as the chat messages. AuditKIT's API model is not thread-safe, so evals run one request at a time. `python -m sglang.bench_serving` still works but is a deprecated alias of `sglang.benchmark.serving`; Notebook B tries both.
 
 ## Risks and fallbacks
 
