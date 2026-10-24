@@ -166,6 +166,117 @@ Exact match is over the 5 structured fields (summary excluded). Latency and thro
 | tuned / plain | 1048 | 1270 | 0.95 | 48.6 |
 | tuned / constrained | 1302 | 1498 | 0.77 | 39.1 |
 
+## Example
+
+Three held-out test tickets with the tuned model's saved output (tuned / plain, from `sample_outputs` in `results/tuned.json`) and the gold JSON. `tuned.json` stores only 5 sample outputs and not the ticket text, so these are matched to the first five rows of the curated test split in order (each saved output has the same category and product as its row). Examples 1 and 3 match gold on all 5 structured fields; example 2 does not. They were picked to show a typical hit and a miss, not at random.
+
+**Example 1** (letter, hard_case: typo): all 5 structured fields match.
+
+Ticket:
+
+```text
+To whom it may conecrn,
+
+Since the firmware upgrade, Orbit Laptop 14 fails to boot properly. Kindly guide me through repairing the faul. I require a resolution within twenty-four hours. Furthee informaiton can be supplied on request.
+
+Respectfully,
+Maya Silva
+```
+
+Tuned model output:
+
+```json
+{
+  "category": "technical",
+  "priority": "high",
+  "product": "Orbit Laptop 14",
+  "sentiment": "neutral",
+  "summary": "User says firmware upgrade affecting Orbit Laptop 14.",
+  "needs_human": false
+}
+```
+
+Gold:
+
+```json
+{
+  "category": "technical",
+  "priority": "high",
+  "product": "Orbit Laptop 14",
+  "sentiment": "neutral",
+  "summary": "The customer describes boot failure after firmware upgrade concerning Orbit Laptop 14.",
+  "needs_human": false
+}
+```
+
+**Example 2** (transcript, hard_case: none): differs on priority (gold `"low"`, model `"medium"`), needs_human (gold `true`, model `false`).
+
+Ticket:
+
+```text
+[transcribed call] hello yes it is Quinn Sharma, i wish to merge two separate Loyalty Rewards profiles into one kindly update my sign-in details a reply within the next few weeks would be fine kindly arrange for a staff member to telephone me further information can be supplied on request um okay that is all, you can email me at lynchgeorge@example.net, bye
+```
+
+Tuned model output:
+
+```json
+{
+  "category": "account",
+  "priority": "medium",
+  "product": "Loyalty Rewards",
+  "sentiment": "neutral",
+  "summary": "User says profile merge request affecting Loyalty Rewards.",
+  "needs_human": false
+}
+```
+
+Gold:
+
+```json
+{
+  "category": "account",
+  "priority": "low",
+  "product": "Loyalty Rewards",
+  "sentiment": "neutral",
+  "summary": "Ticket about profile merge request on Loyalty Rewards; wants a human agent.",
+  "needs_human": true
+}
+```
+
+**Example 3** (transcript, hard_case: none): all 5 structured fields match.
+
+Ticket:
+
+```text
+[voice message transcript] uh hi, this is Rosa Mehta calling, could you share details on the warranty terms for FitTrack Band there is no time pressure on this matter the experience so far has been dreadful um okay that is all, you can email me at jamesshawn@example.com, bye
+```
+
+Tuned model output:
+
+```json
+{
+  "category": "other",
+  "priority": "low",
+  "product": "FitTrack Band",
+  "sentiment": "negative",
+  "summary": "Issue: information request (FitTrack Band).",
+  "needs_human": false
+}
+```
+
+Gold:
+
+```json
+{
+  "category": "other",
+  "priority": "low",
+  "product": "FitTrack Band",
+  "sentiment": "negative",
+  "summary": "The customer describes warranty terms question concerning FitTrack Band.",
+  "needs_human": false
+}
+```
+
 ## Limitations and future work
 
 - Data is synthetic and template-based. The test split uses held-out templates and styles from the same generator, so real tickets will likely score lower.
