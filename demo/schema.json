@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TicketForge ticket extraction",
+  "type": "object",
+  "properties": {
+    "category": {"type": "string", "enum": ["billing", "technical", "account", "shipping", "other"]},
+    "priority": {"type": "string", "enum": ["low", "medium", "high", "urgent"]},
+    "product": {"type": "string", "minLength": 1, "maxLength": 60},
+    "sentiment": {"type": "string", "enum": ["negative", "neutral", "positive"]},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 160, "pattern": "^\\S+(\\s+\\S+){0,19}$"},
+    "needs_human": {"type": "boolean"}
+  },
+  "required": ["category", "priority", "product", "sentiment", "summary", "needs_human"],
+  "additionalProperties": false
+}

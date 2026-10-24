@@ -1,0 +1,22 @@
+[
+ {
+  "label": "email-like",
+  "row": 9,
+  "ticket": "To whom it may concern,\n\nThe courier marked parcel ORD-283600 containing Zenith Smartwatch as delivered, yet nothing came. Immediate action is required, all services are offline. A callback from a member of your team is required. The experience so far has been dreadful.\n\nRespectfully,\nPriya Lindqvist"
+ },
+ {
+  "label": "chat-like",
+  "row": 3,
+  "ticket": "[voice message transcript] uh hi, this is Farid Novak calling, part of the package for Zenith Smartwatch was missing when opened kindly dispatch a new one by courier a reply within the next few weeks would be fine the experience so far has been dreadful um okay that is all, you can email me at perezrebecca@example.com, bye"
+ },
+ {
+  "label": "hard case (mixed sentiment)",
+  "row": 6,
+  "ticket": "To whom it may concern,\n\nFrankly, my patience has run out. The courier marked parcel ORD-998324 containing FitTrack Band as delivered, yet nothing came. This matter is severely affecting my daily operations. Kindly arrange for a staff member to telephone me. Overall I remain a delighted customer.\n\nYours faithfully,\nHiro Tanaka\nsamuel81@example.com"
+ },
+ {
+  "label": "short",
+  "row": 163,
+  "ticket": "Dear Sir or Madam,\n\nMy profile on PhotoVault App was deactivated without any explanation. There is no time pressure on this matter. Overall I remain a delighted customer.\n\nRespectfully,\nSam Silva"
+ }
+]

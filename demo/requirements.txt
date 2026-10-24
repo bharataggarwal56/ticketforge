@@ -1,0 +1,7 @@
+# CPU-only torch wheels (much smaller than the default CUDA build). If this index
+# is unreachable or you already have torch installed, delete this line.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.4
+transformers>=4.56
+gradio>=6
+jsonschema>=4.20

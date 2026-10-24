@@ -277,6 +277,34 @@ Gold:
 }
 ```
 
+## Live demo (run locally)
+
+A Gradio app in `demo/` loads the merged model with transformers on CPU and shows, per ticket, the raw output, the strictly parsed JSON, a schema-valid yes/no badge with the validation error if any, and the generation time. Greedy decoding, `max_new_tokens=128`.
+
+```bash
+cd demo
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python app.py   # then open http://127.0.0.1:7860
+```
+
+Measured on a laptop CPU (14 threads), 4 requests each:
+
+- float32: about 7-10 s per ticket, about 6.3 GiB RAM (used by the demo).
+- bfloat16: slower, about 15-17 s per ticket, about 3.4 GiB RAM.
+- A 2-core machine will be slower; this was not measured.
+
+Evaluation and benchmarks in this project used SGLang on a Colab T4. The demo runs the same merged model with transformers on CPU, so it is slower. A hosted Space was not possible because Hugging Face requires PRO for Gradio Spaces on free CPU.
+
+The four built-in examples (`demo/examples.json`, rows of the test split) compared with the gold labels of the same rows:
+
+| example | row | schema-valid | category | priority | product | sentiment | needs_human |
+|---|---|---|---|---|---|---|---|
+| email-like | 9 | yes | match | match | match | match | match |
+| chat-like | 3 | yes | match | mismatch (output medium, gold low) | match | match | match |
+| hard case (mixed sentiment) | 6 | yes | match | mismatch (output urgent, gold high) | match | match | match |
+| short | 163 | yes | match | match | match | match | match |
+
 ## Limitations and future work
 
 - Data is synthetic and template-based. The test split uses held-out templates and styles from the same generator, so real tickets will likely score lower.
