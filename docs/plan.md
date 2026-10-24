@@ -26,23 +26,27 @@ The tool notes are in `docs/tools.md`. Where this plan and the official docs dis
 1. **Labels:** sample `category`, `priority`, `sentiment`, `needs_human`, and `product`, where the product is drawn from catalog items valid for that category. Sampling is stratified so every enum value is well covered.
 2. **Ticket:** build it from an opener, an issue phrase (category × product), a priority cue ("whenever you can" → low, "production is down" → urgent), a sentiment cue, an escalation cue when `needs_human` is true (legal threat, refund over limit, "let me talk to a person"), and a sign-off. Fake names, emails, and order IDs are added so the CuratorKIT PII step has something to work on.
 3. **Summary:** filled from a summary template using the same slots. The generator asserts it is at most 20 words.
-4. **Held-out pools:** every template, phrase bank, and style has an ID. Styles include email, live chat, tweet, formal letter, voice-to-text transcript, and non-native English. Each ID belongs to either the train pool or the test pool, and test tickets use only test-pool IDs. A leakage check asserts that no ID is in both pools and that train and test bodies share no 8-gram once slot values are removed.
-5. **Hard cases (test only, about 30% of test):**
+4. **Held-out pools:** every template, phrase bank, and style has an ID. The banks are kept small but varied: about 5 train and 3 test issue phrases per category, and 2–4 variants per cue bank. Styles: email, live chat, and short note/tweet (train), plus formal letter and voice-to-text transcript (test). Each ID belongs to either the train pool or the test pool, and each pool's tickets use only that pool's IDs. A leakage check asserts that no ID is in both pools, that every row uses only its own pool's IDs, and that train and test skeletons (text before typo noise, split at slot values) share no 8-gram. The generator runs this check on every run and exits non-zero if it fails.
+5. **Hard cases (about 20% of train and about 30% of test):** each pool builds its hard cases from its own pool's phrases only. Train includes them so the model learns the labeling rules below. The test slices measure whether those rules generalize to unseen wording.
    - *Ambiguous:* cues point to two categories. The explicitly requested action decides the category.
    - *Mixed sentiment:* praise and complaint in one ticket. The sentiment of the final request wins.
    - *Multiple issues:* the first-stated issue sets the category, and priority is the highest across the issues.
    - *Typos:* seeded character noise (swap, drop, keyboard neighbor) on 3–8% of characters. Product names stay recognizable.
 
    Each row has `meta.hard_case` ∈ {none, ambiguous, mixed, multi, typo} so results can be sliced by case type.
-6. **Outputs:** `data/raw/train_pool.jsonl` (~3,000 rows) and `data/raw/test_pool.jsonl` (~500 rows). Columns are `ticket_text`, `label_json` (canonical JSON string), and `meta`. `data/raw` is gitignored. Laptop smoke tests use `--n 50`.
+6. **Outputs:** `data/raw/train_pool.jsonl` (~1,500 rows) and `data/raw/test_pool.jsonl` (~300 rows). `--n` sets the number of train rows, and test gets `n/5`. Columns are `ticket_text`, `label_json` (canonical JSON string), and `meta` (`uid`, `pool`, `style`, `hard_case`, `ids`). Test `label_json` values are unique so that `meta` can be rejoined after CuratorKIT, whose export drops extra columns. `data/raw` is gitignored. Laptop smoke tests use `--n 50`. Unit tests are in `tests/test_gen_tickets.py` (stdlib `unittest`).
 
 ## 2. CuratorKIT (`src/curate.py`, laptop)
 
 - `field_mapping={"ticket_text": "instruction", "label_json": "output"}`. The direction is {source column: DataSample field}.
-- **Run 1, train pool:** `dedup="minhash"`, `clean=True`, PII hygiene on, `export_formats=["messages"]`, `output_split={"train": 0.9, "val": 0.1}`, and a fresh `output_dir` per run (e.g. `data/curated/train_<date>`). Set `min_tokens` low enough for tweet-style tickets.
+- **Run 1, train pool:** `dedup="minhash"`, `clean=True`, `clean_fields=["instruction"]` (so the gold JSON is never modified), `pii_pseudonymize=True` with `pii_spacy_model="en_core_web_sm"`, `export_formats=["messages"]`, `output_split={"train": 0.9, "validation": 0.1}`, and a fresh `output_dir` per run (e.g. `data/curated/train_<date>`). Set `min_tokens` low enough for tweet-style tickets.
 - **Run 2, test pool:** same cleaning and PII settings, `output_split={"test": 1.0}`, separate `output_dir`. Keeping test in its own run stops CuratorKIT's random split from mixing test into train.
-- The instruction holds only the ticket text, so a shared prompt cannot make minhash collapse samples. The system prompt and format instructions come from a single function, `src/prompt.py::build_messages(ticket)`, used after export (to prepend a system message) and again at eval time.
-- Not in tools.md yet, so check the CuratorKIT docs for: whether `output_split` accepts two keys or one, and whether the messages exporter supports a system prompt.
+- The instruction holds only the ticket text, so a shared prompt cannot make minhash collapse samples. The system prompt comes from `src/prompt.py` (`SYSTEM_PROMPT`, `build_messages(ticket)`), which eval also uses. A `preprocessing_fn` adds it as a `system` column, and CuratorKIT writes it as the leading system turn.
+- Checked in the CuratorKIT source (main, 2026-10-24; the config reference page omits some of this):
+  - `output_split` takes any dict whose values sum to 1.0. Samples are shuffled with `output_split_seed`, cut in key order (the last key gets the remainder), and each slice is written to `output_dir/<key>/`. So `{"test": 1.0}` works. Use `validation`, not `val`, as the HF split name.
+  - The `messages` exporter (`sft_messages.jsonl`) adds a leading system turn when `metadata["system_prompt"]` is set. The connector fills that from a raw column named `system`, `system_prompt`, or `system_message`.
+  - The export keeps only `messages`, so `curate.py` rejoins test `meta` on `label_json` into `test_meta.jsonl`.
+- `curate.py` post-checks: every row is system/user/assistant, the system turn equals `SYSTEM_PROMPT`, the assistant turn is schema-valid and equals a raw `label_json`, and product names survive PII pseudonymization.
 - After each run, read `rejected.jsonl` and `manifest.json` and record the counts in the README.
 
 ## 3. Baseline eval (Notebook B)
@@ -138,7 +142,7 @@ ak.evaluate(samples, model="api:MODEL", api_base="http://localhost:30000/v1", ap
 | R2 | SGLang won't start on the T4 (driver older than CUDA 13, missing ninja, nvcc) | Install ninja in the venv with its bin on PATH, then try the triton/pytorch backends, then `sglang==0.5.19`, then a Kaggle T4 runtime |
 | R3 | xgrammar rejects the `summary` `pattern` or is slow with it | Serve with a copy of the schema without the pattern (`configs/schema_serving.json`). The full schema in `schema_valid` still enforces word count |
 | R4 | The model overfits templates and does poorly on held-out styles | Add more phrase banks and compositional slots, and add noise to train. Optionally paraphrase **train only** with an LLM, keeping a paraphrase only if a rule check confirms its labels |
-| R5 | Hard-case gold labels are debatable | Apply the deterministic rules in section 1. Report hard-case slices separately and keep hard cases out of train |
+| R5 | Hard-case gold labels are debatable | Apply the deterministic rules in section 1 in both pools (train ~20%, test ~30%, each from its own pool's phrases). Report hard-case test slices separately |
 | R6 | Minhash drops many templated near-duplicates, or `min_tokens` rejects short tickets | Inspect `rejected.jsonl`. Raise the minhash threshold or use `dedup="exact"`, and lower `min_tokens` |
 | R7 | PII pseudonymization changes product names or order IDs | Diff a sample. If products are affected, restrict hygiene to names and emails |
 | R8 | AlignTune arguments (fp16 flag, combined kwargs) differ from the docs, or the T4 runs out of memory | Read the AlignTune docs and source first. If OOM: batch 2 with grad accumulation 8, gradient checkpointing, `quantization={"load_in_4bit": True}`, `max_seq_length=384` |

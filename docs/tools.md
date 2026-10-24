@@ -157,6 +157,8 @@ Gotchas:
 - `field_mapping` maps `{source_column: datasample_field}`. Writing it the other way round fails silently.
 - `min_tokens` defaults to 10 and `max_tokens` to 2048. Samples outside that range are rejected by the schema gate.
 - Exporters overwrite files of the same name. Use a fresh `output_dir` per run.
+- `output_split` (from the source): any dict whose values sum to 1.0, and each key becomes a subfolder `output_dir/<key>/`. A single key like `{"test": 1.0}` works. Name the split `validation` rather than `val` so it maps to the HF validation split.
+- System prompt (from the source): a raw column named `system`, `system_prompt`, or `system_message` becomes `metadata["system_prompt"]`, and the messages exporter writes it as a leading system turn. `export_formats=["messages"]` is valid even though the config reference page doesn't list it.
 - The output folder is loadable as an HF dataset: `load_dataset("data/curated", "sft_messages")`.
 
 CLI form: `curatorkit run pipeline.yaml --output-dir output/`.
