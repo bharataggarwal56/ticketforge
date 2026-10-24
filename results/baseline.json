@@ -1,0 +1,273 @@
+{
+  "tag": "base",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "schema_used": "no_summary_pattern",
+  "modes": {
+    "plain": {
+      "headline": {
+        "schema_valid": 0.0,
+        "category_acc": 0.0,
+        "priority_acc": 0.0,
+        "product_acc": 0.0,
+        "sentiment_acc": 0.0,
+        "needs_human_acc": 0.0,
+        "summary_len_ok": 0.0,
+        "summary_f1": 0.0,
+        "exact_match_fields": 0.0,
+        "exact_match_strict": 0.0
+      },
+      "perf": {
+        "latency_ms": {
+          "count": 300,
+          "mean": 1716.6073980066737,
+          "min": 1381.5799760000118,
+          "max": 2391.242926000018,
+          "p50": 1700.7149490000302,
+          "p95": 1972.7562350000198,
+          "p99": 2237.856256999976,
+          "std": 151.1119996658424
+        },
+        "throughput": {
+          "rps": 0.5825041071755637,
+          "total_requests": 300,
+          "total_time_ms": 515017.82786500006,
+          "output_tokens_per_sec": 38.75011488967575,
+          "total_tokens_per_sec": 195.6437127966993
+        }
+      },
+      "hard_case": {
+        "all": {
+          "n": 300,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "none": {
+          "n": 210,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "typo": {
+          "n": 22,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "ambiguous": {
+          "n": 23,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "mixed": {
+          "n": 23,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "multi": {
+          "n": 22,
+          "schema_valid": 0.0,
+          "category_acc": 0.0,
+          "priority_acc": 0.0,
+          "product_acc": 0.0,
+          "sentiment_acc": 0.0,
+          "needs_human_acc": 0.0,
+          "summary_len_ok": 0.0,
+          "summary_f1": 0.0,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        }
+      },
+      "sample_outputs": [
+        "```json\n{\n  \"category\": \"account\",\n  \"priority\": \"medium\",\n  \"product\": \"Loyalty Rewards\",\n  \"sentiment\": \"neutral\",\n  \"summary\": \"Customer is asking about the availability of Loyalty Rewards in physical stores.\",\n  \"needs_human\": false\n}\n```",
+        "```json\n{\n  \"category\": \"technical\",\n  \"priority\": \"urgent\",\n  \"product\": \"Orbit Laptop 14\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Firmware upgrade causes Orbit Laptop 14 to fail to boot. Urgent technical support needed within 24 hours.\",\n  \"needs_human\": true\n}\n```",
+        "```json\n{\n  \"category\": \"account\",\n  \"priority\": \"medium\",\n  \"product\": \"Loyalty Rewards\",\n  \"sentiment\": \"neutral\",\n  \"summary\": \"Merge two Loyalty Rewards profiles and update sign-in details.\",\n  \"needs_human\": true\n}\n```",
+        "```json\n{\n  \"category\": \"shipping\",\n  \"priority\": \"urgent\",\n  \"product\": \"Zenith Smartwatch\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Package missing component, urgent shipping needed.\",\n  \"needs_human\": true\n}\n```",
+        "```json\n{\n  \"category\": \"technical\",\n  \"priority\": \"high\",\n  \"product\": \"FitTrack Band\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Customer expresses dissatisfaction with FitTrack Band warranty terms and experience.\",\n  \"needs_human\": true\n}\n```"
+      ],
+      "bench": {
+        "completed": 200,
+        "request_throughput": 3.251035776279951,
+        "output_throughput": 169.05386036655744,
+        "total_throughput": 1176.8749510133423,
+        "mean_e2e_latency_ms": 4823.61833452499,
+        "median_e2e_latency_ms": 4296.244058500065,
+        "p99_e2e_latency_ms": 11692.403150880154,
+        "mean_ttft_ms": 2242.1525714149866,
+        "mean_itl_ms": 51.19046245249917,
+        "module": "sglang.bench_serving"
+      },
+      "eval_seconds": 629.3
+    },
+    "constrained": {
+      "headline": {
+        "schema_valid": 0.9733333333333334,
+        "category_acc": 0.66,
+        "priority_acc": 0.2633333333333333,
+        "product_acc": 0.9866666666666667,
+        "sentiment_acc": 0.5366666666666666,
+        "needs_human_acc": 0.5566666666666666,
+        "summary_len_ok": 0.9733333333333334,
+        "summary_f1": 0.24460909904217473,
+        "exact_match_fields": 0.02666666666666667,
+        "exact_match_strict": 0.0
+      },
+      "perf": {
+        "latency_ms": {
+          "count": 300,
+          "mean": 1582.7357959366577,
+          "min": 1127.8680509999504,
+          "max": 2181.2991780000175,
+          "p50": 1563.1498210000245,
+          "p95": 1870.6741250000505,
+          "p99": 2007.0794670000396,
+          "std": 149.59636130309246
+        },
+        "throughput": {
+          "rps": 0.6317707042666606,
+          "total_requests": 300,
+          "total_time_ms": 474855.8266060002,
+          "output_tokens_per_sec": 39.548846087092954,
+          "total_tokens_per_sec": 209.7120734766229
+        }
+      },
+      "hard_case": {
+        "all": {
+          "n": 300,
+          "schema_valid": 0.9733333333333334,
+          "category_acc": 0.66,
+          "priority_acc": 0.2633333333333333,
+          "product_acc": 0.9866666666666667,
+          "sentiment_acc": 0.5366666666666666,
+          "needs_human_acc": 0.5566666666666666,
+          "summary_len_ok": 0.9733333333333334,
+          "summary_f1": 0.24460909904217473,
+          "exact_match_fields": 0.02666666666666667,
+          "exact_match_strict": 0.0
+        },
+        "none": {
+          "n": 210,
+          "schema_valid": 0.9666666666666667,
+          "category_acc": 0.7571428571428571,
+          "priority_acc": 0.26666666666666666,
+          "product_acc": 0.9952380952380953,
+          "sentiment_acc": 0.5285714285714286,
+          "needs_human_acc": 0.5523809523809524,
+          "summary_len_ok": 0.9666666666666667,
+          "summary_f1": 0.250104421686816,
+          "exact_match_fields": 0.03333333333333333,
+          "exact_match_strict": 0.0
+        },
+        "typo": {
+          "n": 22,
+          "schema_valid": 1.0,
+          "category_acc": 0.4090909090909091,
+          "priority_acc": 0.18181818181818182,
+          "product_acc": 0.9545454545454546,
+          "sentiment_acc": 0.5,
+          "needs_human_acc": 0.5454545454545454,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.2487390270145979,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "ambiguous": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.30434782608695654,
+          "priority_acc": 0.13043478260869565,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.6086956521739131,
+          "needs_human_acc": 0.6521739130434783,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.19072430520793424,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "mixed": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.6521739130434783,
+          "priority_acc": 0.43478260869565216,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.6086956521739131,
+          "needs_human_acc": 0.4782608695652174,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.25682892684007685,
+          "exact_match_fields": 0.0,
+          "exact_match_strict": 0.0
+        },
+        "multi": {
+          "n": 22,
+          "schema_valid": 0.9545454545454546,
+          "category_acc": 0.36363636363636365,
+          "priority_acc": 0.2727272727272727,
+          "product_acc": 0.9090909090909091,
+          "sentiment_acc": 0.5,
+          "needs_human_acc": 0.5909090909090909,
+          "summary_len_ok": 0.9545454545454546,
+          "summary_f1": 0.2315826466816203,
+          "exact_match_fields": 0.045454545454545456,
+          "exact_match_strict": 0.0
+        }
+      },
+      "sample_outputs": [
+        "{\n  \"category\": \"account\",\n  \"priority\": \"medium\",\n  \"product\": \"Loyalty Rewards\",\n  \"sentiment\": \"neutral\",\n  \"summary\": \"Customer is asking about physical store availability of Loyalty Rewards.\",\n  \"needs_human\": false\n}",
+        "{\n  \"category\": \"technical\",\n  \"priority\": \"urgent\",\n  \"product\": \"Orbit Laptop 14\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Firmware upgrade causes Orbit Laptop 14 to fail to boot properly. Urgent technical support needed within 24 hours.\",\n  \"needs_human\": true\n}",
+        "{\n  \"category\": \"account\",\n  \"priority\": \"medium\",\n  \"product\": \"Loyalty Rewards\",\n  \"sentiment\": \"neutral\",\n  \"summary\": \"Customer wishes to merge two Loyalty Rewards profiles and update sign-in details.\",\n  \"needs_human\": true\n}",
+        "{\n  \"category\": \"shipping\",\n  \"priority\": \"urgent\",\n  \"product\": \"Zenith Smartwatch\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Package missing component, urgent shipping needed.\",\n  \"needs_human\": true\n}",
+        "{\n  \"category\": \"technical\",\n  \"priority\": \"high\",\n  \"product\": \"FitTrack Band\",\n  \"sentiment\": \"negative\",\n  \"summary\": \"Customer is upset with FitTrack Band's warranty terms and experience.\",\n  \"needs_human\": true\n}"
+      ],
+      "bench": {
+        "completed": 200,
+        "request_throughput": 5.706202923982623,
+        "output_throughput": 296.72255204709637,
+        "total_throughput": 2065.6454584817093,
+        "mean_e2e_latency_ms": 2734.3223815500073,
+        "median_e2e_latency_ms": 2745.7952400000067,
+        "p99_e2e_latency_ms": 2973.309554270072,
+        "mean_ttft_ms": 609.602362935002,
+        "mean_itl_ms": 41.68944024271265,
+        "module": "sglang.bench_serving"
+      },
+      "eval_seconds": 549.8
+    }
+  }
+}

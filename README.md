@@ -45,8 +45,70 @@ Curated data is in the private HF dataset `bharataggarwal56/ticketforge-data` (`
 | `max_seq_length` | 384, so no example is truncated |
 | `aligntune advise estimate` (T4, seq 384) | VRAM 3.1 GB at batch 4, 2.2 GB at batch 2 (±30%) |
 
-The T4 training run itself has not been done yet; results will be added here.
+**Run (Colab T4).** Qwen2.5-1.5B-Instruct, LoRA r=16, alpha=32, dropout 0.05 on q, k, v, o, gate, up, down (18,464,768 trainable of 1,562,179,072 parameters, 1.18%). fp16, lr 2e-4, batch 4 x grad accumulation 2 (effective 8), `max_seq_length` 384, 3 epochs, 505 steps, evaluated and checkpointed every 168 steps. Training time 1032 s (about 17 min).
+
+| Step | Train loss | Validation loss |
+|---|---|---|
+| 168 | 0.1326 | 0.1320 |
+| 336 | 0.1001 | 0.1227 |
+| 504 | 0.1087 | 0.1217 |
+
+Final eval_loss 0.1217; mean token accuracy about 0.962-0.963. AlignTune's result dict also reported `final_loss` 0.2419, which does not match the last logged training loss (0.1087); it is listed here only as the trainer's reported value, without interpretation.
+
+These losses and the token accuracy are computed over all tokens, including the roughly 250-token system prompt, so they are not task accuracy. The real results are the held-out test numbers below. Validation shares templates with train, so validation loss is not a generalization estimate.
 
 ### Evaluation (Notebook B, `notebooks/B_serve_eval.ipynb`)
 
-`src/scorers.py` holds the metrics (strict `json.loads`, schema-valid, per-field accuracy, `exact_match_fields` as the headline, summary length and F1). `python -m unittest discover tests` checks them, runs AuditKIT against a stub server, and confirms `response_format` is forwarded. Notebook B serves the base and the merged tuned model with SGLang on one T4, evaluates plain and constrained decoding, runs `sglang.bench_serving`, and writes `results/baseline.json`, `results/tuned.json`, `comparison.md` and `comparison.png` (pushed to the HF dataset repo after each model). `RUN_BASE` / `RUN_TUNED` select the halves. Not run on a GPU yet; results will be added here.
+`src/scorers.py` holds the metrics (strict `json.loads`, schema-valid, per-field accuracy, `exact_match_fields` as the headline, summary length and F1). `python -m unittest discover tests` checks them, runs AuditKIT against a stub server, and confirms `response_format` is forwarded. Notebook B serves the base and the merged tuned model with SGLang on one T4, evaluates plain and constrained decoding, runs `sglang.bench_serving`, and writes `results/baseline.json`, `results/tuned.json`, `comparison.md` and `comparison.png` (pushed to the HF dataset repo after each model). `RUN_BASE` / `RUN_TUNED` select the halves.
+
+## Results
+
+Setup: held-out test split (n=300), SGLang 0.5.22 on a Colab T4, fp16, triton attention backend, AuditKIT 1.1.3, temperature 0, max_tokens 256, one request at a time. Models: base Qwen2.5-1.5B-Instruct and the merged tuned model `bharataggarwal56/ticketforge-qwen2.5-1.5b-merged`. Source of truth: `results/baseline.json` and `results/tuned.json`.
+
+The server rejected the full schema (the summary word-count pattern) for both models, so constrained decoding used the schema without that pattern (`schema_used = no_summary_pattern`). The scorer still validates every output against the full schema.
+
+![Base vs tuned, plain vs constrained](results/comparison.png)
+
+### 2x2: base/tuned x plain/constrained (test split, n=300)
+
+| model / mode | schema-valid | exact match | category | priority | product | sentiment | needs_human | summary F1 | mean latency ms | req/s | out tok/s |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| base / plain | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 | 4824 | 3.25 | 169 |
+| base / constrained | 0.973 | 0.027 | 0.660 | 0.263 | 0.987 | 0.537 | 0.557 | 0.245 | 2734 | 5.71 | 297 |
+| tuned / plain | 1.000 | 0.533 | 0.937 | 0.697 | 1.000 | 0.937 | 0.840 | 0.423 | 4230 | 3.70 | 192 |
+| tuned / constrained | 1.000 | 0.533 | 0.937 | 0.700 | 1.000 | 0.937 | 0.840 | 0.423 | 2738 | 5.74 | 298 |
+
+Exact match is over the 5 structured fields (summary excluded). Latency and throughput are from `sglang.bench_serving` (random prompts, 310 in / 52 out tokens, 200 prompts, concurrency 16); the constrained rows send `response_format` with the schema.
+
+### Exact match (5 structured fields) by hard_case
+
+| model / mode | all | none | typo | ambiguous | mixed | multi |
+|---|---|---|---|---|---|---|
+| base / plain | 0.000 (n=300) | 0.000 (n=210) | 0.000 (n=22) | 0.000 (n=23) | 0.000 (n=23) | 0.000 (n=22) |
+| base / constrained | 0.027 (n=300) | 0.033 (n=210) | 0.000 (n=22) | 0.000 (n=23) | 0.000 (n=23) | 0.045 (n=22) |
+| tuned / plain | 0.533 (n=300) | 0.548 (n=210) | 0.545 (n=22) | 0.565 (n=23) | 0.435 (n=23) | 0.455 (n=22) |
+| tuned / constrained | 0.533 (n=300) | 0.548 (n=210) | 0.545 (n=22) | 0.565 (n=23) | 0.435 (n=23) | 0.455 (n=22) |
+
+### Reading the results
+
+- **Schema validity.** The tuned model is already 100% schema-valid without constraints, so constrained decoding adds nothing for it; it mainly rescues the base model (0.000 to 0.973). In all five saved base/plain sample outputs the JSON is wrapped in a markdown code fence, which strict `json.loads` rejects; only five samples are stored, so this is not a count over all 300. Eight base/constrained outputs (0.973 x 300 = 292 valid) still fail the full schema; the saved samples do not show why, so the cause is not stated here.
+- **Plain vs constrained (tuned).** Effectively identical. Priority 0.697 vs 0.700 is one prediction.
+- **Quality gain.** Exact match goes from 0.03 (base, constrained) to 0.53 (tuned). Priority (0.70) and needs_human (0.84) are the weakest fields and drag exact match down; category and sentiment are 0.94 and product is 1.00.
+- **Summary F1** is low by construction (0.42): test summary templates differ from train templates, so word overlap with the reference is limited even when the summary is reasonable.
+- **Uncertainty.** With n=300, an exact match of 0.53 has a 95% interval of roughly plus or minus 6 points. The hard_case slices have only 22-23 rows each, so their intervals are roughly plus or minus 20 points and the differences between slices are not significant. No significant drop on hard cases was observed; this does not show the model handles them as well as easy ones.
+- **Latency and throughput.** `bench_serving` used random prompts of fixed length, so these numbers describe the server, not the task, and the constrained and plain rows are not necessarily like-for-like. They are reported as measured; no claim is made that constrained decoding is faster. The per-request latency from the one-at-a-time evaluation runs (AuditKIT) is below for reference.
+
+| model / mode | mean latency ms (1 request at a time) | p95 ms | req/s | out tok/s |
+|---|---|---|---|---|
+| base / plain | 1717 | 1973 | 0.58 | 38.8 |
+| base / constrained | 1583 | 1871 | 0.63 | 39.5 |
+| tuned / plain | 1048 | 1270 | 0.95 | 48.6 |
+| tuned / constrained | 1302 | 1498 | 0.77 | 39.1 |
+
+## Limitations and future work
+
+- Data is synthetic and template-based. The test split uses held-out templates and styles from the same generator, so real tickets will likely score lower.
+- Labeling conventions for mixed, ambiguous and multi cases are our own.
+- One model, one seed, one run. No human-labelled data. fp16 on a free T4.
+- Priority is the weakest field, but `tuned.json` stores only 5 sample outputs, so no confusion matrix can be built and the cause is not analysed. Future work: save all predictions and analyse priority and needs_human errors.
+- The cause of the 8 base/constrained schema failures is not determined, for the same reason.

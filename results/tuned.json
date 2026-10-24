@@ -1,0 +1,273 @@
+{
+  "tag": "tuned",
+  "model": "bharataggarwal56/ticketforge-qwen2.5-1.5b-merged",
+  "schema_used": "no_summary_pattern",
+  "modes": {
+    "plain": {
+      "headline": {
+        "schema_valid": 1.0,
+        "category_acc": 0.9366666666666666,
+        "priority_acc": 0.6966666666666667,
+        "product_acc": 1.0,
+        "sentiment_acc": 0.9366666666666666,
+        "needs_human_acc": 0.84,
+        "summary_len_ok": 1.0,
+        "summary_f1": 0.4226632040049883,
+        "exact_match_fields": 0.5333333333333333,
+        "exact_match_strict": 0.0
+      },
+      "perf": {
+        "latency_ms": {
+          "count": 300,
+          "mean": 1047.5815060066695,
+          "min": 763.30671300002,
+          "max": 1408.980676000283,
+          "p50": 1050.5090860001474,
+          "p95": 1269.5603150000352,
+          "p99": 1359.5247519997429,
+          "std": 135.21726827437348
+        },
+        "throughput": {
+          "rps": 0.9544700258639837,
+          "total_requests": 300,
+          "total_time_ms": 314310.5512700001,
+          "output_tokens_per_sec": 48.60479528374693,
+          "total_tokens_per_sec": 305.68493361670517
+        }
+      },
+      "hard_case": {
+        "all": {
+          "n": 300,
+          "schema_valid": 1.0,
+          "category_acc": 0.9366666666666666,
+          "priority_acc": 0.6966666666666667,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9366666666666666,
+          "needs_human_acc": 0.84,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.4226632040049883,
+          "exact_match_fields": 0.5333333333333333,
+          "exact_match_strict": 0.0
+        },
+        "none": {
+          "n": 210,
+          "schema_valid": 1.0,
+          "category_acc": 0.9809523809523809,
+          "priority_acc": 0.6714285714285714,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9380952380952381,
+          "needs_human_acc": 0.8333333333333334,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.4181842456355792,
+          "exact_match_fields": 0.5476190476190477,
+          "exact_match_strict": 0.0
+        },
+        "typo": {
+          "n": 22,
+          "schema_valid": 1.0,
+          "category_acc": 0.8181818181818182,
+          "priority_acc": 0.7727272727272727,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9090909090909091,
+          "needs_human_acc": 0.8636363636363636,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.3754101714943135,
+          "exact_match_fields": 0.5454545454545454,
+          "exact_match_strict": 0.0
+        },
+        "ambiguous": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.8260869565217391,
+          "priority_acc": 0.9130434782608695,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.8260869565217391,
+          "needs_human_acc": 0.9130434782608695,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.45147669733189466,
+          "exact_match_fields": 0.5652173913043478,
+          "exact_match_strict": 0.0
+        },
+        "mixed": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.9565217391304348,
+          "priority_acc": 0.6086956521739131,
+          "product_acc": 1.0,
+          "sentiment_acc": 1.0,
+          "needs_human_acc": 0.8260869565217391,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.4333085953026608,
+          "exact_match_fields": 0.43478260869565216,
+          "exact_match_strict": 0.0
+        },
+        "multi": {
+          "n": 22,
+          "schema_valid": 1.0,
+          "category_acc": 0.7272727272727273,
+          "priority_acc": 0.7272727272727273,
+          "product_acc": 1.0,
+          "sentiment_acc": 1.0,
+          "needs_human_acc": 0.8181818181818182,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.4714174597525085,
+          "exact_match_fields": 0.45454545454545453,
+          "exact_match_strict": 0.0
+        }
+      },
+      "sample_outputs": [
+        "{\"category\": \"other\", \"priority\": \"medium\", \"product\": \"Loyalty Rewards\", \"sentiment\": \"neutral\", \"summary\": \"Customer reports physical store availability question for Loyalty Rewards.\", \"needs_human\": false}",
+        "{\"category\": \"technical\", \"priority\": \"high\", \"product\": \"Orbit Laptop 14\", \"sentiment\": \"neutral\", \"summary\": \"User says firmware upgrade affecting Orbit Laptop 14.\", \"needs_human\": false}",
+        "{\"category\": \"account\", \"priority\": \"medium\", \"product\": \"Loyalty Rewards\", \"sentiment\": \"neutral\", \"summary\": \"User says profile merge request affecting Loyalty Rewards.\", \"needs_human\": false}",
+        "{\"category\": \"shipping\", \"priority\": \"medium\", \"product\": \"Zenith Smartwatch\", \"sentiment\": \"negative\", \"summary\": \"Customer reports item missing for Zenith Smartwatch.\", \"needs_human\": false}",
+        "{\"category\": \"other\", \"priority\": \"low\", \"product\": \"FitTrack Band\", \"sentiment\": \"negative\", \"summary\": \"Issue: information request (FitTrack Band).\", \"needs_human\": false}"
+      ],
+      "bench": {
+        "completed": 200,
+        "request_throughput": 3.6962212002725714,
+        "output_throughput": 192.2035024141737,
+        "total_throughput": 1338.032074498671,
+        "mean_e2e_latency_ms": 4230.11895227499,
+        "median_e2e_latency_ms": 4300.5528275000415,
+        "p99_e2e_latency_ms": 4573.076304729966,
+        "mean_ttft_ms": 1697.9006282649834,
+        "mean_itl_ms": 50.0523768320486,
+        "module": "sglang.bench_serving"
+      },
+      "eval_seconds": 415.1
+    },
+    "constrained": {
+      "headline": {
+        "schema_valid": 1.0,
+        "category_acc": 0.9366666666666666,
+        "priority_acc": 0.7,
+        "product_acc": 1.0,
+        "sentiment_acc": 0.9366666666666666,
+        "needs_human_acc": 0.84,
+        "summary_len_ok": 1.0,
+        "summary_f1": 0.42292865532926316,
+        "exact_match_fields": 0.5333333333333333,
+        "exact_match_strict": 0.0
+      },
+      "perf": {
+        "latency_ms": {
+          "count": 300,
+          "mean": 1301.7362274433178,
+          "min": 1024.5039269998415,
+          "max": 1920.904185999916,
+          "p50": 1289.8727900001177,
+          "p95": 1498.404964999736,
+          "p99": 1739.9285620003866,
+          "std": 128.37055057742847
+        },
+        "throughput": {
+          "rps": 0.7681347222291365,
+          "total_requests": 300,
+          "total_time_ms": 390556.488749,
+          "output_tokens_per_sec": 39.123661852204016,
+          "total_tokens_per_sec": 246.01562838647374
+        }
+      },
+      "hard_case": {
+        "all": {
+          "n": 300,
+          "schema_valid": 1.0,
+          "category_acc": 0.9366666666666666,
+          "priority_acc": 0.7,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9366666666666666,
+          "needs_human_acc": 0.84,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.42292865532926316,
+          "exact_match_fields": 0.5333333333333333,
+          "exact_match_strict": 0.0
+        },
+        "none": {
+          "n": 210,
+          "schema_valid": 1.0,
+          "category_acc": 0.9809523809523809,
+          "priority_acc": 0.6714285714285714,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9380952380952381,
+          "needs_human_acc": 0.8333333333333334,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.41833363872614876,
+          "exact_match_fields": 0.5476190476190477,
+          "exact_match_strict": 0.0
+        },
+        "typo": {
+          "n": 22,
+          "schema_valid": 1.0,
+          "category_acc": 0.8181818181818182,
+          "priority_acc": 0.7727272727272727,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.9090909090909091,
+          "needs_human_acc": 0.8636363636363636,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.3754101714943135,
+          "exact_match_fields": 0.5454545454545454,
+          "exact_match_strict": 0.0
+        },
+        "ambiguous": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.8260869565217391,
+          "priority_acc": 0.9565217391304348,
+          "product_acc": 1.0,
+          "sentiment_acc": 0.8260869565217391,
+          "needs_human_acc": 0.9130434782608695,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.45147669733189466,
+          "exact_match_fields": 0.5652173913043478,
+          "exact_match_strict": 0.0
+        },
+        "mixed": {
+          "n": 23,
+          "schema_valid": 1.0,
+          "category_acc": 0.9565217391304348,
+          "priority_acc": 0.6086956521739131,
+          "product_acc": 1.0,
+          "sentiment_acc": 1.0,
+          "needs_human_acc": 0.8260869565217391,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.4333085953026608,
+          "exact_match_fields": 0.43478260869565216,
+          "exact_match_strict": 0.0
+        },
+        "multi": {
+          "n": 22,
+          "schema_valid": 1.0,
+          "category_acc": 0.7272727272727273,
+          "priority_acc": 0.7272727272727273,
+          "product_acc": 1.0,
+          "sentiment_acc": 1.0,
+          "needs_human_acc": 0.8181818181818182,
+          "summary_len_ok": 1.0,
+          "summary_f1": 0.47361122558263796,
+          "exact_match_fields": 0.45454545454545453,
+          "exact_match_strict": 0.0
+        }
+      },
+      "sample_outputs": [
+        "{\"category\": \"other\", \"priority\": \"medium\", \"product\": \"Loyalty Rewards\", \"sentiment\": \"neutral\", \"summary\": \"Customer reports physical store availability question for Loyalty Rewards.\", \"needs_human\": false}",
+        "{\"category\": \"technical\", \"priority\": \"high\", \"product\": \"Orbit Laptop 14\", \"sentiment\": \"neutral\", \"summary\": \"User says firmware upgrade affecting Orbit Laptop 14.\", \"needs_human\": false}",
+        "{\"category\": \"account\", \"priority\": \"medium\", \"product\": \"Loyalty Rewards\", \"sentiment\": \"neutral\", \"summary\": \"User says profile merge request affecting Loyalty Rewards.\", \"needs_human\": false}",
+        "{\"category\": \"shipping\", \"priority\": \"medium\", \"product\": \"Zenith Smartwatch\", \"sentiment\": \"negative\", \"summary\": \"Customer reports item missing for Zenith Smartwatch.\", \"needs_human\": false}",
+        "{\"category\": \"other\", \"priority\": \"low\", \"product\": \"FitTrack Band\", \"sentiment\": \"negative\", \"summary\": \"Issue: information request (FitTrack Band).\", \"needs_human\": false}"
+      ],
+      "bench": {
+        "completed": 200,
+        "request_throughput": 5.736687099936956,
+        "output_throughput": 298.3077291967217,
+        "total_throughput": 2076.6807301771782,
+        "mean_e2e_latency_ms": 2738.493016944999,
+        "median_e2e_latency_ms": 2792.334748500025,
+        "p99_e2e_latency_ms": 2934.3139848397914,
+        "mean_ttft_ms": 376.6116348499918,
+        "mean_itl_ms": 46.39837359458378,
+        "module": "sglang.bench_serving"
+      },
+      "eval_seconds": 467.4
+    }
+  }
+}
